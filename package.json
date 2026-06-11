@@ -4,6 +4,7 @@
   "packageManager": "pnpm@9.0.0",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate",
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
