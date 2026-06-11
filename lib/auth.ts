@@ -1,7 +1,12 @@
 import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs"
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
+const JWT_SECRET = process.env.JWT_SECRET
+
+// Validate JWT_SECRET is set
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is not set. Please configure it in your .env file.")
+}
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = await bcrypt.genSalt(10)
