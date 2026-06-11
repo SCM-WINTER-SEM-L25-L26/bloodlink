@@ -1,8 +1,10 @@
 {
   "name": "my-v0-project",
   "version": "0.1.0",
+  "packageManager": "pnpm@latest",
   "private": true,
   "scripts": {
+    "preinstall": "corepack enable && corepack prepare pnpm@latest --activate",
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
