@@ -22,20 +22,54 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
 
-  // Load user from localStorage on mount
+  // Load user from localStorage on mount (client-side only)
   useEffect(() => {
-    const token = localStorage.getItem("auth_token")
-    const userData = localStorage.getItem("user")
-    if (token && userData) {
-      try {
-        setUser(JSON.parse(userData))
-      } catch (e) {
-        localStorage.removeItem("auth_token")
-        localStorage.removeItem("user")
+    // Ensure we're on the client side
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem("auth_token")
+      const userData = localStorage.getItem("user")
+      
+      if (token && userData) {
+        try {
+          const parsedUser = JSON.parse(userData)
+          // Verify token is still valid by calling the backend
+          fetch("/api/auth/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token }),
+          })
+            .then(async (response) => {
+              if (response.ok) {
+                // Token is valid, restore user
+                const data = await response.json()
+                setUser(data.user)
+              } else {
+                // Token is invalid or expired, clear storage
+                localStorage.removeItem("auth_token")
+                localStorage.removeItem("user")
+                setUser(null)
+              }
+            })
+            .catch((error) => {
+              console.error("Error verifying token:", error)
+              // On network error, still restore from localStorage but user might be stale
+              setUser(parsedUser)
+            })
+        } catch (e) {
+          console.error("Error parsing user from localStorage:", e)
+          localStorage.removeItem("auth_token")
+          localStorage.removeItem("user")
+          setUser(null)
+        }
+      } else {
+        setUser(null)
       }
+      
+      setLoading(false)
+      setMounted(true)
     }
-    setLoading(false)
   }, [])
 
   const login = async (email: string, password: string) => {

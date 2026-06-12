@@ -3,19 +3,25 @@
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { LoginForm } from "@/components/login-form"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 export default function LoginPage() {
   const router = useRouter()
   const { isAuthenticated, loading } = useAuth()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (!loading && isAuthenticated) {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    // Only redirect after component is mounted and auth loading is complete
+    if (mounted && !loading && isAuthenticated) {
       router.push("/")
     }
-  }, [isAuthenticated, loading, router])
+  }, [isAuthenticated, loading, router, mounted])
 
-  if (loading) {
+  if (!mounted || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

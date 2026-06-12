@@ -38,9 +38,19 @@ export function LoginForm({ onSuccess, defaultTab = "login" }: LoginFormProps) {
 
     try {
       await login(formData.email, formData.password)
+      // Clear form data after successful login
+      setFormData({
+        email: "",
+        password: "",
+        name: "",
+        confirmPassword: "",
+      })
+      // Call onSuccess callback (which will redirect)
       onSuccess?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed")
+      const errorMessage = err instanceof Error ? err.message : "Login failed"
+      setError(errorMessage)
+      console.error("Login error:", errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -59,9 +69,19 @@ export function LoginForm({ onSuccess, defaultTab = "login" }: LoginFormProps) {
 
     try {
       await registerUser(formData.email, formData.name, formData.password)
+      // Clear form data after successful registration
+      setFormData({
+        email: "",
+        password: "",
+        name: "",
+        confirmPassword: "",
+      })
+      // Call onSuccess callback (which will redirect)
       onSuccess?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed")
+      const errorMessage = err instanceof Error ? err.message : "Registration failed"
+      setError(errorMessage)
+      console.error("Registration error:", errorMessage)
     } finally {
       setIsLoading(false)
     }

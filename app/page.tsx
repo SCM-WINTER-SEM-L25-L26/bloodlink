@@ -20,18 +20,24 @@ export default function HomePage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const { isAuthenticated, loading } = useAuth()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    // Only redirect after component is mounted and auth loading is complete
+    if (mounted && !loading && !isAuthenticated) {
       router.push("/login")
     }
-  }, [isAuthenticated, loading, router])
+  }, [isAuthenticated, loading, router, mounted])
 
   const handleOnboardingComplete = (profile: UserProfile) => {
     setUserProfile({ ...profile, completedOnboarding: true })
   }
 
-  if (loading) {
+  if (!mounted || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
