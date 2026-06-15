@@ -53,13 +53,14 @@ export async function POST(req: Request) {
       token,
     })
   } catch (error) {
-    console.error("Login error:", error)
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 })
-    }
-    return NextResponse.json(
-      { error: "Failed to login" },
-      { status: 500 }
-    )
-  }
+  console.error("Login error:", error)
+
+  return NextResponse.json(
+    {
+      error: "Failed to login",
+      details: error instanceof Error ? error.message : String(error)
+    },
+    { status: 500 }
+  )
+}
 }

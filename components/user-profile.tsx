@@ -33,7 +33,7 @@ export function UserProfile() {
         onClick={handleLogout}
         className="gap-2"
       >
-        <LogOut className="w-4 h-4" />
+        <LogOut className="w-4 h-10" />
         Logout
       </Button>
     </div>
