@@ -1,11 +1,14 @@
 import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs"
 
-const JWT_SECRET = process.env.JWT_SECRET
-
-// Validate JWT_SECRET is set
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is not set. Please configure it in your .env file.")
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET
+  if (!secret) {
+    throw new Error(
+      "JWT_SECRET environment variable is not set. Please configure it in your .env file."
+    )
+  }
+  return secret
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -21,14 +24,16 @@ export async function verifyPassword(
 }
 
 export function createToken(userId: string): string {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "7d" })
+  const secret = getJwtSecret()
+  return jwt.sign({ userId }, secret, { expiresIn: "7d" })
 }
 
 export function verifyToken(token: string): { userId: string } | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET)
+    const secret = getJwtSecret()
+    const decoded = jwt.verify(token, secret)
     return decoded as { userId: string }
-  } catch {
+  } catch (err) {
     return null
   }
 }

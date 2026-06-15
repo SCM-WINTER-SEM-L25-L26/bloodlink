@@ -26,39 +26,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Load user from localStorage on mount (client-side only)
   useEffect(() => {
-    // Ensure we're on the client side
-    if (typeof window !== 'undefined') {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const initializeAuth = async () => {
+      setLoading(true)
       const token = localStorage.getItem("auth_token")
       const userData = localStorage.getItem("user")
-      
+
       if (token && userData) {
         try {
           const parsedUser = JSON.parse(userData)
-          // Verify token is still valid by calling the backend
-          fetch("/api/auth/verify", {
+          const response = await fetch("/api/auth/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token }),
           })
-            .then(async (response) => {
-              if (response.ok) {
-                // Token is valid, restore user
-                const data = await response.json()
-                setUser(data.user)
-              } else {
-                // Token is invalid or expired, clear storage
-                localStorage.removeItem("auth_token")
-                localStorage.removeItem("user")
-                setUser(null)
-              }
-            })
-            .catch((error) => {
-              console.error("Error verifying token:", error)
-              // On network error, still restore from localStorage but user might be stale
-              setUser(parsedUser)
-            })
+
+          if (response.ok) {
+            const data = await response.json()
+            setUser(data.user)
+          } else {
+            localStorage.removeItem("auth_token")
+            localStorage.removeItem("user")
+            setUser(null)
+          }
         } catch (e) {
-          console.error("Error parsing user from localStorage:", e)
+          console.error("Error restoring auth from storage:", e)
           localStorage.removeItem("auth_token")
           localStorage.removeItem("user")
           setUser(null)
@@ -66,10 +61,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setUser(null)
       }
-      
+
       setLoading(false)
       setMounted(true)
     }
+
+    initializeAuth()
   }, [])
 
   const login = async (email: string, password: string) => {
