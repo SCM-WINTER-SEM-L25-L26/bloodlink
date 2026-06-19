@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect } from "react"
 import { BloodLinkNavbar } from "./bloodlink-navbar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,6 +33,44 @@ interface EmergencyRequest {
   urgencyLevel: string
   status: string
   createdAt: string
+}
+
+function BloodDropSVG({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2C12 2 5 10 5 15C5 19 8 22 12 22C16 22 19 19 19 15C19 10 12 2 12 2Z" fill="currentColor" opacity="0.15" />
+      <path d="M12 2C12 2 7 9.5 7 14C7 17.5 9.5 20 12 20C14.5 20 17 17.5 17 14C17 9.5 12 2 12 2Z" fill="currentColor" opacity="0.3" />
+      <path d="M12 4C12 4 8 10.5 8 14C8 16.5 10 18.5 12 18.5C14 18.5 16 16.5 16 14C16 10.5 12 4 12 4Z" fill="currentColor" />
+    </svg>
+  )
+}
+
+function HeartbeatLine() {
+  return (
+    <svg className="w-full h-8 text-red-400/30" viewBox="0 0 200 20" preserveAspectRatio="none">
+      <polyline
+        points="0,10 30,10 35,3 40,17 45,10 70,10 75,3 80,17 85,10 110,10 115,3 120,17 125,10 150,10 155,3 160,17 165,10 200,10"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        className="animate-pulse"
+      />
+    </svg>
+  )
+}
+
+function FloatingDrop({ className, delay }: { className?: string; delay?: string }) {
+  return (
+    <div
+      className={`absolute opacity-20 ${className || ""}`}
+      style={{
+        animation: `floatDrop 6s ease-in-out infinite`,
+        animationDelay: delay || "0s",
+      }}
+    >
+      <BloodDropSVG className="w-full h-full" />
+    </div>
+  )
 }
 
 export default function EmergencyPage() {
@@ -195,31 +233,62 @@ export default function EmergencyPage() {
     <div className="min-h-screen bg-gradient-to-b from-red-50 via-white to-white">
       <BloodLinkNavbar />
 
+      <style>{`
+        @keyframes floatDrop {
+          0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.2; }
+          50% { transform: translateY(-20px) rotate(10deg); opacity: 0.35; }
+        }
+        @keyframes heartbeat {
+          0%, 100% { transform: scale(1); }
+          14% { transform: scale(1.15); }
+          28% { transform: scale(1); }
+          42% { transform: scale(1.1); }
+          70% { transform: scale(1); }
+        }
+        .animate-heartbeat {
+          animation: heartbeat 1.5s ease-in-out infinite;
+        }
+        `}</style>
+
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-red-600 via-red-700 to-red-900 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.12),transparent_60%),radial-gradient(ellipse_at_bottom_right,rgba(255,255,255,0.08),transparent_60%)]" />
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-400/10 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '1.5s' }} />
-        <div className="container mx-auto px-4 py-24 md:py-32 relative">
+      <section className="relative overflow-hidden min-h-[600px] md:min-h-[700px] flex items-center">
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=1600&q=80"
+            alt="Blood donation"
+            className="w-full h-full object-cover"
+            style={{ filter: "brightness(0.3) saturate(1.2)" }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-red-950/90 via-red-900/80 to-red-950/90" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(220,38,38,0.3),transparent_70%)]" />
+        </div>
+
+        <FloatingDrop className="w-16 h-16 text-red-400 top-[15%] left-[8%]" delay="0s" />
+        <FloatingDrop className="w-10 h-10 text-red-300 top-[25%] right-[12%]" delay="1.5s" />
+        <FloatingDrop className="w-20 h-20 text-red-400 bottom-[20%] right-[8%]" delay="3s" />
+        <FloatingDrop className="w-12 h-12 text-red-300 bottom-[30%] left-[5%]" delay="4.5s" />
+
+        <div className="container mx-auto px-4 relative z-10 py-20">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md rounded-full px-4 py-1.5 text-sm mb-6 border border-white/10 shadow-lg shadow-red-900/20">
-              <Heart className="h-4 w-4 text-red-200" />
-              Every donation can save up to 3 lives
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 text-sm mb-6 border border-white/10 shadow-lg">
+              <Heart className="h-4 w-4 text-red-300 animate-heartbeat" />
+              <span className="text-white/90">Every donation can save up to 3 lives</span>
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-4">
-              Connect. Donate.{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-200 to-red-100">Save Lives.</span>
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-4 text-white">
+              Give Blood.
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-300 to-red-100">Save a Life.</span>
             </h1>
-            <p className="text-lg md:text-xl text-red-100/90 mb-8 max-w-2xl mx-auto leading-relaxed">
-              BloodLink connects blood donors with those in urgent need. Join our community of heroes and make a difference today.
+            <p className="text-lg md:text-xl text-white/70 mb-8 max-w-2xl mx-auto leading-relaxed">
+              BloodLink connects blood donors with those in urgent need. Join our community of everyday heroes.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button asChild size="lg" className="bg-white text-red-700 hover:bg-red-50 shadow-lg shadow-red-900/30 hover:shadow-xl hover:scale-[1.02] transition-all">
+              <Button asChild size="lg" className="bg-white text-red-700 hover:bg-red-50 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all font-semibold">
                 <Link href="/login?tab=register">
                   Become a Donor <Heart className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 transition-all">
+              <Button asChild size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 transition-all backdrop-blur-sm">
                 <Link href="#emergency">
                   View Requests <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -227,14 +296,16 @@ export default function EmergencyPage() {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-red-50 to-transparent" />
+
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-red-50 to-transparent" />
       </section>
 
       {/* Stats */}
-      <section className="container mx-auto px-4 -mt-12 relative z-10">
+      <section className="container mx-auto px-4 -mt-16 relative z-20">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {stats.map((stat, i) => (
-            <Card key={stat.label} className="border-0 shadow-xl bg-white/90 backdrop-blur-sm hover:shadow-2xl transition-all hover:-translate-y-1">
+          {stats.map((stat) => (
+            <Card key={stat.label} className="border-0 shadow-xl bg-white/95 backdrop-blur-sm hover:shadow-2xl transition-all hover:-translate-y-1 overflow-hidden">
+              <div className="h-1 bg-gradient-to-r from-red-600 to-red-400" />
               <CardContent className="p-6 text-center">
                 <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-red-100 to-red-50 shadow-inner">
                   <stat.icon className="h-6 w-6 text-red-600" />
@@ -247,104 +318,159 @@ export default function EmergencyPage() {
         </div>
       </section>
 
+      {/* Divider */}
+      <div className="container mx-auto px-4 py-12">
+        <HeartbeatLine />
+      </div>
+
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-20" id="emergency">
+      <main className="container mx-auto px-4 py-8" id="emergency">
 
         {/* Emergency Request Form + Active Requests */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
-          {/* Form */}
           <div className="lg:col-span-1">
-            <Card className="border-red-200/50 shadow-lg overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white rounded-none p-5">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
-                    <AlertCircle className="h-4 w-4" />
+            <div className="bg-white rounded-xl shadow-[0_2px_20px_rgba(220,38,38,0.08)] border border-red-100/60 overflow-hidden">
+              <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/20 border border-red-400/20">
+                    <AlertCircle className="h-5 w-5 text-red-400" />
                   </div>
-                  Emergency Blood Request
-                </CardTitle>
-                <p className="text-sm text-red-100 font-normal">Fill this form to request blood immediately</p>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Patient/Requester Name *</label>
-                    <Input
-                      placeholder="Full name"
-                      value={formData.requesterName}
-                      onChange={(e) => setFormData({ ...formData, requesterName: e.target.value })}
-                      required
-                      className="border-slate-200 focus:border-red-400 focus:ring-red-400/20"
-                    />
+                  <div>
+                    <h3 className="text-base font-semibold text-white">Emergency Blood Request</h3>
+                    <p className="text-xs text-slate-400 mt-0.5">Fill this form to request blood immediately</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Blood Group *</label>
-                      <select
-                        value={mounted ? formData.bloodGroup : ""}
-                        onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
-                        className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus:outline-none focus:border-red-400 focus:ring-[3px] focus:ring-red-400/20"
+                </div>
+              </div>
+
+              <div className="p-6">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                      Patient / Requester Name <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Input
+                        placeholder="Enter patient or requester name"
+                        value={formData.requesterName}
+                        onChange={(e) => setFormData({ ...formData, requesterName: e.target.value })}
                         required
-                      >
-                        <option value="" disabled>Select</option>
-                        {bloodGroups.map((g) => (
-                          <option key={g} value={g}>{g}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Urgency *</label>
-                      <select
-                        value={mounted ? formData.urgency : "NORMAL"}
-                        onChange={(e) => setFormData({ ...formData, urgency: e.target.value })}
-                        className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus:outline-none focus:border-red-400 focus:ring-[3px] focus:ring-red-400/20"
-                      >
-                        <option value="NORMAL">Normal</option>
-                        <option value="URGENT">Urgent</option>
-                        <option value="CRITICAL">Critical</option>
-                      </select>
+                        className="pl-10 h-10 border-slate-200 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/15 text-sm transition-all"
+                      />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Hospital Name</label>
-                    <Input
-                      placeholder="e.g. City General Hospital"
-                      value={formData.hospitalName}
-                      onChange={(e) => setFormData({ ...formData, hospitalName: e.target.value })}
-                      className="border-slate-200 focus:border-red-400 focus:ring-red-400/20"
-                    />
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                        Blood Group <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <Droplet className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
+                        <select
+                          value={mounted ? formData.bloodGroup : ""}
+                          onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
+                          className="w-full h-10 pl-10 rounded-lg border border-slate-200 bg-slate-50/50 text-sm focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/15 transition-all appearance-none cursor-pointer"
+                          required
+                        >
+                          <option value="" disabled>Select</option>
+                          {bloodGroups.map((g) => (
+                            <option key={g} value={g}>{g}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                        Urgency <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <AlertCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
+                        <select
+                          value={mounted ? formData.urgency : "NORMAL"}
+                          onChange={(e) => setFormData({ ...formData, urgency: e.target.value })}
+                          className="w-full h-10 pl-10 rounded-lg border border-slate-200 bg-slate-50/50 text-sm focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/15 transition-all appearance-none cursor-pointer"
+                        >
+                          <option value="NORMAL">Normal</option>
+                          <option value="URGENT">Urgent</option>
+                          <option value="CRITICAL">Critical</option>
+                        </select>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Location</label>
-                    <Input
-                      placeholder="City, Area"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      className="border-slate-200 focus:border-red-400 focus:ring-red-400/20"
-                    />
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Hospital Name</label>
+                    <div className="relative">
+                      <Hospital className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Input
+                        placeholder="e.g. City General Hospital"
+                        value={formData.hospitalName}
+                        onChange={(e) => setFormData({ ...formData, hospitalName: e.target.value })}
+                        className="pl-10 h-10 border-slate-200 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/15 text-sm transition-all"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Contact Number *</label>
-                    <Input
-                      placeholder="Phone number"
-                      value={formData.contactNumber}
-                      onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
-                      required
-                      className="border-slate-200 focus:border-red-400 focus:ring-red-400/20"
-                    />
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Location</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Input
+                        placeholder="City, Area"
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        className="pl-10 h-10 border-slate-200 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/15 text-sm transition-all"
+                      />
+                    </div>
                   </div>
-                  <Button type="submit" className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 h-11 text-base shadow-lg shadow-red-600/20" disabled={submitting}>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                      Contact Number <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Input
+                        type="tel"
+                        placeholder="Phone number with country code"
+                        value={formData.contactNumber}
+                        onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
+                        required
+                        className="pl-10 h-10 border-slate-200 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/15 text-sm transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full h-11 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold text-sm rounded-lg shadow-lg shadow-red-600/20 hover:shadow-xl hover:shadow-red-600/30 transition-all disabled:opacity-50"
+                    disabled={submitting}
+                  >
                     {submitting ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Submitting...</>
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Submitting Request...
+                      </span>
                     ) : (
-                      "Submit Emergency Request"
+                      <span className="flex items-center justify-center gap-2">
+                        <ArrowRight className="h-4 w-4" />
+                        Submit Emergency Request
+                      </span>
                     )}
                   </Button>
                 </form>
-              </CardContent>
-            </Card>
+
+                <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200/50 flex items-start gap-2.5">
+                  <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-amber-700 leading-relaxed">
+                    This request will be sent to all matching donors in your area. Please provide accurate contact information.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Active Requests */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -379,7 +505,7 @@ export default function EmergencyPage() {
               </Card>
             ) : (
               <>
-                {requests.map((req, i) => (
+                {requests.map((req) => (
                   <Card key={req.id} className="hover:shadow-lg transition-all border-l-[5px] border-l-red-600 overflow-hidden">
                     <CardContent className="p-5">
                       <div className="flex flex-col md:flex-row justify-between gap-4">
@@ -440,21 +566,24 @@ export default function EmergencyPage() {
 
         {/* Donor Registration */}
         <section className="mb-20" id="donate">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-red-100 rounded-full px-4 py-1.5 text-sm text-red-700 mb-4">
-              <Droplet className="h-4 w-4" /> Make a Difference
+          <div className="relative mb-16">
+            <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 via-red-500/10 to-red-600/5 rounded-3xl" />
+            <div className="relative py-16 px-4 text-center">
+              <div className="inline-flex items-center gap-2 bg-red-100 rounded-full px-4 py-1.5 text-sm text-red-700 mb-4">
+                <Droplet className="h-4 w-4" /> Make a Difference
+              </div>
+              <h2 className="text-4xl font-bold text-slate-900 mb-3">Register as a Blood Donor</h2>
+              <p className="text-muted-foreground max-w-lg mx-auto text-lg">
+                Sign up to be notified when someone in your area needs your blood type
+              </p>
             </div>
-            <h2 className="text-4xl font-bold text-slate-900 mb-3">Register as a Blood Donor</h2>
-            <p className="text-muted-foreground max-w-lg mx-auto text-lg">
-              Sign up to be notified when someone in your area needs your blood type
-            </p>
           </div>
 
           {!isAuthenticated ? (
             <Card className="max-w-lg mx-auto border-2 border-dashed border-red-200 bg-gradient-to-br from-red-50/50 to-white shadow-lg">
               <CardContent className="p-12 text-center">
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-                  <Heart className="h-8 w-8 text-red-500" />
+                  <Heart className="h-8 w-8 text-red-500 animate-heartbeat" />
                 </div>
                 <h3 className="text-xl font-semibold text-slate-900 mb-2">Sign in Required</h3>
                 <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
@@ -481,103 +610,119 @@ export default function EmergencyPage() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="max-w-lg mx-auto border-red-200/50 shadow-xl">
-              <div className="h-2 bg-gradient-to-r from-red-600 via-red-500 to-red-600 rounded-t-lg" />
-              <CardContent className="p-7">
-                {donorError && (
-                  <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 mb-4 border border-red-100">
-                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                    <span>{donorError}</span>
-                  </div>
-                )}
-                {donorSuccess && (
-                  <div className="flex items-center gap-2 rounded-lg bg-green-50 p-3 text-sm text-green-700 mb-4 border border-green-100">
-                    <CheckCircle className="h-4 w-4 flex-shrink-0" />
-                    <span>Successfully registered as a donor!</span>
-                  </div>
-                )}
-                <form onSubmit={handleDonorSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Blood Group *</label>
-                    <select
-                      value={donorForm.bloodGroup}
-                      onChange={(e) => setDonorForm({ ...donorForm, bloodGroup: e.target.value })}
-                      className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus:outline-none focus:border-red-400 focus:ring-[3px] focus:ring-red-400/20"
-                      required
-                    >
-                      <option value="" disabled>Select blood group</option>
-                      {bloodGroups.map((g) => (
-                        <option key={g} value={g}>{g}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto items-start">
+              <div className="relative rounded-2xl overflow-hidden h-full min-h-[400px] hidden lg:block">
+                <img
+                  src="https://images.unsplash.com/photo-1638202993928-7267aad84c31?w=600&q=80"
+                  alt="Blood donation"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-red-900/80 via-red-900/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-8">
+                  <BloodDropSVG className="w-12 h-12 text-white/80 mb-3" />
+                  <h3 className="text-2xl font-bold text-white mb-2">Your Donation Matters</h3>
+                  <p className="text-white/70 text-sm">One pint of blood can save up to three lives. Join our community today.</p>
+                </div>
+              </div>
+
+              <Card className="border-red-200/50 shadow-xl">
+                <div className="h-2 bg-gradient-to-r from-red-600 via-red-500 to-red-600 rounded-t-lg" />
+                <CardContent className="p-7">
+                  {donorError && (
+                    <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 mb-4 border border-red-100">
+                      <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                      <span>{donorError}</span>
+                    </div>
+                  )}
+                  {donorSuccess && (
+                    <div className="flex items-center gap-2 rounded-lg bg-green-50 p-3 text-sm text-green-700 mb-4 border border-green-100">
+                      <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                      <span>Successfully registered as a donor!</span>
+                    </div>
+                  )}
+                  <form onSubmit={handleDonorSubmit} className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Age *</label>
-                      <Input
-                        type="number"
-                        placeholder="e.g. 25"
-                        value={donorForm.age}
-                        onChange={(e) => setDonorForm({ ...donorForm, age: e.target.value })}
+                      <label className="text-sm font-medium text-slate-700">Blood Group *</label>
+                      <select
+                        value={donorForm.bloodGroup}
+                        onChange={(e) => setDonorForm({ ...donorForm, bloodGroup: e.target.value })}
+                        className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus:outline-none focus:border-red-400 focus:ring-[3px] focus:ring-red-400/20"
                         required
-                        min={1}
-                        max={150}
+                      >
+                        <option value="" disabled>Select blood group</option>
+                        {bloodGroups.map((g) => (
+                          <option key={g} value={g}>{g}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700">Age *</label>
+                        <Input
+                          type="number"
+                          placeholder="e.g. 25"
+                          value={donorForm.age}
+                          onChange={(e) => setDonorForm({ ...donorForm, age: e.target.value })}
+                          required
+                          min={1}
+                          max={150}
+                          className="border-slate-200 focus:border-red-400 focus:ring-red-400/20"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700">Phone *</label>
+                        <Input
+                          type="tel"
+                          placeholder="Phone number"
+                          value={donorForm.phone}
+                          onChange={(e) => setDonorForm({ ...donorForm, phone: e.target.value })}
+                          required
+                          className="border-slate-200 focus:border-red-400 focus:ring-red-400/20"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-slate-700">City *</label>
+                      <Input
+                        placeholder="e.g. Mumbai"
+                        value={donorForm.city}
+                        onChange={(e) => setDonorForm({ ...donorForm, city: e.target.value })}
+                        required
                         className="border-slate-200 focus:border-red-400 focus:ring-red-400/20"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Phone *</label>
+                      <label className="text-sm font-medium text-slate-700">Last Donation Date</label>
                       <Input
-                        type="tel"
-                        placeholder="Phone number"
-                        value={donorForm.phone}
-                        onChange={(e) => setDonorForm({ ...donorForm, phone: e.target.value })}
-                        required
+                        type="date"
+                        value={donorForm.lastDonation}
+                        onChange={(e) => setDonorForm({ ...donorForm, lastDonation: e.target.value })}
                         className="border-slate-200 focus:border-red-400 focus:ring-red-400/20"
                       />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">City *</label>
-                    <Input
-                      placeholder="e.g. Mumbai"
-                      value={donorForm.city}
-                      onChange={(e) => setDonorForm({ ...donorForm, city: e.target.value })}
-                      required
-                      className="border-slate-200 focus:border-red-400 focus:ring-red-400/20"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Last Donation Date</label>
-                    <Input
-                      type="date"
-                      value={donorForm.lastDonation}
-                      onChange={(e) => setDonorForm({ ...donorForm, lastDonation: e.target.value })}
-                      className="border-slate-200 focus:border-red-400 focus:ring-red-400/20"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
-                    <input
-                      type="checkbox"
-                      id="isAvailable"
-                      checked={donorForm.isAvailable}
-                      onChange={(e) => setDonorForm({ ...donorForm, isAvailable: e.target.checked })}
-                      className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
-                    />
-                    <label htmlFor="isAvailable" className="text-sm text-slate-700 font-medium cursor-pointer">
-                      Available for donation
-                    </label>
-                  </div>
-                  <Button type="submit" className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 h-11 text-base shadow-lg shadow-red-600/20" disabled={donorSubmitting}>
-                    {donorSubmitting ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Registering...</>
-                    ) : (
-                      "Register as Donor"
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+                    <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
+                      <input
+                        type="checkbox"
+                        id="isAvailable"
+                        checked={donorForm.isAvailable}
+                        onChange={(e) => setDonorForm({ ...donorForm, isAvailable: e.target.checked })}
+                        className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      />
+                      <label htmlFor="isAvailable" className="text-sm text-slate-700 font-medium cursor-pointer">
+                        Available for donation
+                      </label>
+                    </div>
+                    <Button type="submit" className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 h-11 text-base shadow-lg shadow-red-600/20" disabled={donorSubmitting}>
+                      {donorSubmitting ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Registering...</>
+                      ) : (
+                        "Register as Donor"
+                      )}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
           )}
         </section>
 
@@ -655,21 +800,27 @@ export default function EmergencyPage() {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="rounded-2xl bg-gradient-to-br from-red-600 via-red-700 to-red-900 p-12 md:p-16 text-white text-center relative overflow-hidden shadow-2xl">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.1),transparent_70%)]" />
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[80px]" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-red-400/10 rounded-full blur-[60px]" />
-          <div className="relative">
+        {/* CTA with Image */}
+        <section className="rounded-2xl overflow-hidden relative shadow-2xl mb-8">
+          <div className="absolute inset-0">
+            <img
+              src="https://images.unsplash.com/photo-1582719188393-badd2c0cb4df?w=1200&q=80"
+              alt="Blood donation"
+              className="w-full h-full object-cover"
+              style={{ filter: "brightness(0.35)" }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-red-950/80 via-red-900/60 to-red-950/80" />
+          </div>
+          <div className="relative p-12 md:p-16 text-white text-center">
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm border border-white/10">
-              <Heart className="h-8 w-8 text-red-200" />
+              <Heart className="h-8 w-8 text-red-300 animate-heartbeat" />
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Make a Difference?</h2>
-            <p className="text-red-100/90 mb-8 max-w-lg mx-auto text-lg leading-relaxed">
+            <p className="text-white/80 mb-8 max-w-lg mx-auto text-lg leading-relaxed">
               Join thousands of donors who have already saved lives through BloodLink
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button asChild size="lg" className="bg-white text-red-700 hover:bg-red-50 hover:scale-[1.02] transition-all shadow-lg shadow-red-900/30">
+              <Button asChild size="lg" className="bg-white text-red-700 hover:bg-red-50 hover:scale-[1.02] transition-all shadow-lg">
                 <Link href="/login?tab=register">Register as Donor</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 transition-all">
