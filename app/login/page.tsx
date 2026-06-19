@@ -1,22 +1,20 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { LoginForm } from "@/components/login-form"
-import { useEffect, useState, Suspense } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Droplet } from "lucide-react"
 
-function LoginContent() {
+export default function LoginPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { isAuthenticated, loading } = useAuth()
   const [mounted, setMounted] = useState(false)
 
-  const tabParam = searchParams.get("tab")
-  const defaultTab = tabParam === "register" ? "register" : "login"
-
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (mounted && !loading && isAuthenticated) {
@@ -54,27 +52,12 @@ function LoginContent() {
             <h1 className="text-2xl font-bold text-slate-900">Welcome to BloodLink</h1>
             <p className="text-muted-foreground mt-1">Sign in to save lives or create an account</p>
           </div>
-          <LoginForm onSuccess={() => router.push("/")} defaultTab={defaultTab} />
+          <LoginForm onSuccess={() => router.push("/")} />
         </div>
       </div>
       <div className="text-center py-4 text-xs text-muted-foreground">
         &copy; {new Date().getFullYear()} BloodLink. Saving lives together.
       </div>
     </div>
-  )
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-2 border-red-600 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    }>
-      <LoginContent />
-    </Suspense>
   )
 }
