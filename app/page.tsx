@@ -16,6 +16,17 @@ import {
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
 
+const bloodCompatibility: Record<string, { canDonateTo: string[]; canReceive: string[] }> = {
+  "A+":  { canDonateTo: ["A+", "AB+"], canReceive: ["A+", "A-", "O+", "O-"] },
+  "A-":  { canDonateTo: ["A+", "A-", "AB+", "AB-"], canReceive: ["A-", "O-"] },
+  "B+":  { canDonateTo: ["B+", "AB+"], canReceive: ["B+", "B-", "O+", "O-"] },
+  "B-":  { canDonateTo: ["B+", "B-", "AB+", "AB-"], canReceive: ["B-", "O-"] },
+  "AB+": { canDonateTo: ["AB+"], canReceive: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] },
+  "AB-": { canDonateTo: ["AB+", "AB-"], canReceive: ["A-", "B-", "AB-", "O-"] },
+  "O+":  { canDonateTo: ["A+", "B+", "AB+", "O+"], canReceive: ["O+", "O-"] },
+  "O-":  { canDonateTo: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"], canReceive: ["O-"] },
+}
+
 const stats = [
   { icon: Users, label: "Registered Donors", value: "2,847" },
   { icon: Heart, label: "Lives Saved", value: "1,234" },
@@ -328,17 +339,33 @@ export default function EmergencyPage() {
 
         {/* Emergency Request Form + Active Requests */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-6">
             <div className="bg-white rounded-xl shadow-[0_2px_20px_rgba(220,38,38,0.08)] border border-red-100/60 overflow-hidden">
-              <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-5">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/20 border border-red-400/20">
-                    <AlertCircle className="h-5 w-5 text-red-400" />
+              {/* Medical Image Banner */}
+              <div className="relative h-44 overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=600&q=80"
+                  alt="Medical emergency"
+                  className="w-full h-full object-cover"
+                  style={{ filter: "brightness(0.45) saturate(1.1)" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-red-950/90 via-red-900/50 to-transparent" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.2),transparent_60%)]" />
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm border border-white/20">
+                      <AlertCircle className="h-5 w-5 text-red-300" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-white drop-shadow-sm">Emergency Blood Request</h3>
+                      <p className="text-xs text-white/70 mt-0.5">Fill this form to request blood immediately</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-white">Emergency Blood Request</h3>
-                    <p className="text-xs text-slate-400 mt-0.5">Fill this form to request blood immediately</p>
-                  </div>
+                </div>
+                <div className="absolute top-3 right-3">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/30 backdrop-blur-sm text-red-200 border border-red-400/30 uppercase tracking-wider animate-pulse">
+                    Urgent
+                  </span>
                 </div>
               </div>
 
@@ -360,68 +387,91 @@ export default function EmergencyPage() {
                     </div>
                   </div>
 
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                      Blood Group <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {bloodGroups.map((g) => {
+                        const isSelected = formData.bloodGroup === g
+                        return (
+                          <button
+                            key={g}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, bloodGroup: g })}
+                            className={`h-10 rounded-lg border text-sm font-bold transition-all ${
+                              isSelected
+                                ? "bg-red-600 text-white border-red-600 shadow-md shadow-red-600/20 scale-105"
+                                : "bg-white text-slate-700 border-slate-200 hover:border-red-300 hover:bg-red-50"
+                            }`}
+                          >
+                            {g}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {formData.bloodGroup && (
+                      <p className="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1">
+                        <Droplet className="h-3 w-3 text-red-400" />
+                        Can receive from: {bloodCompatibility[formData.bloodGroup]?.canReceive.join(", ")}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+                      Urgency Level <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex gap-2">
+                      {[
+                        { value: "NORMAL", label: "Normal", color: "border-yellow-300 bg-yellow-50 text-yellow-700", selected: "bg-yellow-400 text-white border-yellow-400", dot: "bg-yellow-500" },
+                        { value: "URGENT", label: "Urgent", color: "border-orange-300 bg-orange-50 text-orange-700", selected: "bg-orange-500 text-white border-orange-500", dot: "bg-orange-500" },
+                        { value: "CRITICAL", label: "Critical", color: "border-red-300 bg-red-50 text-red-700", selected: "bg-red-600 text-white border-red-600 animate-pulse", dot: "bg-red-600" },
+                      ].map((item) => {
+                        const isSelected = formData.urgency === item.value
+                        return (
+                          <button
+                            key={item.value}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, urgency: item.value })}
+                            className={`flex-1 h-10 rounded-lg border text-xs font-semibold transition-all ${
+                              isSelected ? item.selected : item.color
+                            }`}
+                          >
+                            <span className="flex items-center justify-center gap-1.5">
+                              <span className={`w-1.5 h-1.5 rounded-full ${item.dot} ${isSelected ? "bg-white" : ""}`} />
+                              {item.label}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
-                        Blood Group <span className="text-red-500">*</span>
-                      </label>
+                      <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Hospital Name</label>
                       <div className="relative">
-                        <Droplet className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
-                        <select
-                          value={mounted ? formData.bloodGroup : ""}
-                          onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
-                          className="w-full h-10 pl-10 rounded-lg border border-slate-200 bg-slate-50/50 text-sm focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/15 transition-all appearance-none cursor-pointer"
-                          required
-                        >
-                          <option value="" disabled>Select</option>
-                          {bloodGroups.map((g) => (
-                            <option key={g} value={g}>{g}</option>
-                          ))}
-                        </select>
+                        <Hospital className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Input
+                          placeholder="e.g. City General"
+                          value={formData.hospitalName}
+                          onChange={(e) => setFormData({ ...formData, hospitalName: e.target.value })}
+                          className="pl-10 h-10 border-slate-200 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/15 text-sm transition-all"
+                        />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
-                        Urgency <span className="text-red-500">*</span>
-                      </label>
+                      <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Location</label>
                       <div className="relative">
-                        <AlertCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none z-10" />
-                        <select
-                          value={mounted ? formData.urgency : "NORMAL"}
-                          onChange={(e) => setFormData({ ...formData, urgency: e.target.value })}
-                          className="w-full h-10 pl-10 rounded-lg border border-slate-200 bg-slate-50/50 text-sm focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/15 transition-all appearance-none cursor-pointer"
-                        >
-                          <option value="NORMAL">Normal</option>
-                          <option value="URGENT">Urgent</option>
-                          <option value="CRITICAL">Critical</option>
-                        </select>
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Input
+                          placeholder="City, Area"
+                          value={formData.location}
+                          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                          className="pl-10 h-10 border-slate-200 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/15 text-sm transition-all"
+                        />
                       </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Hospital Name</label>
-                    <div className="relative">
-                      <Hospital className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                      <Input
-                        placeholder="e.g. City General Hospital"
-                        value={formData.hospitalName}
-                        onChange={(e) => setFormData({ ...formData, hospitalName: e.target.value })}
-                        className="pl-10 h-10 border-slate-200 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/15 text-sm transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Location</label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                      <Input
-                        placeholder="City, Area"
-                        value={formData.location}
-                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        className="pl-10 h-10 border-slate-200 bg-slate-50/50 focus:bg-white focus:border-red-400 focus:ring-2 focus:ring-red-400/15 text-sm transition-all"
-                      />
                     </div>
                   </div>
 
@@ -461,12 +511,40 @@ export default function EmergencyPage() {
                   </Button>
                 </form>
 
-                <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200/50 flex items-start gap-2.5">
+                <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-amber-50 to-amber-50/50 border border-amber-200/50 flex items-start gap-2.5">
                   <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-amber-700 leading-relaxed">
-                    This request will be sent to all matching donors in your area. Please provide accurate contact information.
-                  </p>
+                  <div>
+                    <p className="text-xs font-semibold text-amber-800">Important Notice</p>
+                    <p className="text-xs text-amber-700 leading-relaxed mt-0.5">
+                      This request will be sent to all matching donors in your area. Please provide accurate contact information for a swift response.
+                    </p>
+                  </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Quick Blood Compatibility Card */}
+            <div className="bg-white rounded-xl shadow-[0_2px_20px_rgba(220,38,38,0.06)] border border-red-100/40 overflow-hidden">
+              <div className="px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700">
+                <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                  <Droplet className="h-4 w-4" />
+                  Blood Compatibility Guide
+                </h4>
+              </div>
+              <div className="p-4">
+                <div className="grid grid-cols-4 gap-1.5 text-center text-xs">
+                  {bloodGroups.map((g) => (
+                    <div key={g} className="py-2 px-1 rounded-md bg-slate-50 border border-slate-100">
+                      <div className="font-bold text-red-600 text-sm">{g}</div>
+                      <div className="text-[10px] text-slate-500 mt-0.5 leading-tight">
+                        Donate: {bloodCompatibility[g].canDonateTo.length === 8 ? "All" : bloodCompatibility[g].canDonateTo.join(", ")}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[10px] text-center text-slate-400 mt-2">
+                  O- is the universal donor &bull; AB+ is the universal recipient
+                </p>
               </div>
             </div>
           </div>
@@ -566,14 +644,22 @@ export default function EmergencyPage() {
 
         {/* Donor Registration */}
         <section className="mb-20" id="donate">
-          <div className="relative mb-16">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 via-red-500/10 to-red-600/5 rounded-3xl" />
-            <div className="relative py-16 px-4 text-center">
-              <div className="inline-flex items-center gap-2 bg-red-100 rounded-full px-4 py-1.5 text-sm text-red-700 mb-4">
+          <div className="relative mb-16 rounded-3xl overflow-hidden min-h-[200px] flex items-center">
+            <div className="absolute inset-0">
+              <img
+                src="https://images.unsplash.com/photo-1536859355448-76f92ebdc33d?w=1200&q=80"
+                alt="Blood donors"
+                className="w-full h-full object-cover"
+                style={{ filter: "brightness(0.35) saturate(1.1)" }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-red-950/80 via-red-900/60 to-red-950/80" />
+            </div>
+            <div className="relative py-16 px-4 text-center w-full">
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md rounded-full px-4 py-1.5 text-sm text-white border border-white/10 mb-4">
                 <Droplet className="h-4 w-4" /> Make a Difference
               </div>
-              <h2 className="text-4xl font-bold text-slate-900 mb-3">Register as a Blood Donor</h2>
-              <p className="text-muted-foreground max-w-lg mx-auto text-lg">
+              <h2 className="text-4xl font-bold text-white mb-3 drop-shadow-sm">Register as a Blood Donor</h2>
+              <p className="text-white/70 max-w-lg mx-auto text-lg">
                 Sign up to be notified when someone in your area needs your blood type
               </p>
             </div>
@@ -729,11 +815,22 @@ export default function EmergencyPage() {
         {/* Registered Donors Showcase */}
         {donors.length > 0 && (
           <section className="mb-20">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-slate-900 mb-3">Our Donor Community</h2>
-              <p className="text-muted-foreground max-w-lg mx-auto">
-                {donors.length} registered donors ready to help
-              </p>
+            <div className="relative mb-10 rounded-2xl overflow-hidden min-h-[160px] flex items-center">
+              <div className="absolute inset-0">
+                <img
+                  src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=1200&q=80"
+                  alt="Community of donors"
+                  className="w-full h-full object-cover"
+                  style={{ filter: "brightness(0.35)" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-red-950/80 via-red-900/60 to-red-950/80" />
+              </div>
+              <div className="relative py-10 px-4 text-center w-full">
+                <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-sm">Our Donor Community</h2>
+                <p className="text-white/70 max-w-lg mx-auto">
+                  {donors.length} registered donors ready to help
+                </p>
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
               {(showAllDonors ? donors : donors.slice(0, 6)).map((donor: any) => (
@@ -782,16 +879,38 @@ export default function EmergencyPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
-              { icon: Search, step: "01", title: "Find a Request", desc: "Browse emergency blood requests in your area or nearby hospitals." },
-              { icon: CheckCircle, step: "02", title: "Respond & Confirm", desc: "Contact the requester or hospital to confirm your donation appointment." },
-              { icon: Droplet, step: "03", title: "Donate & Save", desc: "Visit the hospital, donate blood, and help save a life in your community." },
-            ].map((item, i) => (
-              <Card key={item.step} className="border-0 shadow-lg text-center bg-white/60 backdrop-blur-sm hover:shadow-xl transition-all hover:-translate-y-1">
-                <CardContent className="p-8">
-                  <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-red-100 to-red-50 shadow-inner transition-transform hover:scale-110">
-                    <item.icon className="h-7 w-7 text-red-600" />
+              {
+                icon: Search, step: "01", title: "Find a Request", desc: "Browse emergency blood requests in your area or nearby hospitals.",
+                img: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=80"
+              },
+              {
+                icon: CheckCircle, step: "02", title: "Respond & Confirm", desc: "Contact the requester or hospital to confirm your donation appointment.",
+                img: "https://images.unsplash.com/photo-1559757175-5700dde675bc?w=400&q=80"
+              },
+              {
+                icon: Droplet, step: "03", title: "Donate & Save", desc: "Visit the hospital, donate blood, and help save a life in your community.",
+                img: "https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=400&q=80"
+              },
+            ].map((item) => (
+              <Card key={item.step} className="border-0 shadow-lg text-center bg-white/60 backdrop-blur-sm hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden">
+                <div className="relative h-36 overflow-hidden">
+                  <img
+                    src={item.img}
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                    style={{ filter: "brightness(0.6)" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-red-900/80 via-red-800/30 to-transparent" />
+                  <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">{item.step}</span>
                   </div>
-                  <div className="text-xs font-bold text-red-400 mb-1 tracking-wider">{item.step}</div>
+                  <div className="absolute bottom-3 right-3">
+                    <div className="w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                      <item.icon className="h-5 w-5 text-red-300" />
+                    </div>
+                  </div>
+                </div>
+                <CardContent className="p-6">
                   <h3 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
                 </CardContent>

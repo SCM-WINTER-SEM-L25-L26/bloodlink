@@ -257,3 +257,64 @@
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* Medical-themed form enhancements */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out both;
+}
+
+.form-section-enter {
+  animation: slide-up 0.3s ease-out both;
+}
+
+.form-section-enter:nth-child(1) { animation-delay: 0.05s; }
+.form-section-enter:nth-child(2) { animation-delay: 0.1s; }
+.form-section-enter:nth-child(3) { animation-delay: 0.15s; }
+.form-section-enter:nth-child(4) { animation-delay: 0.2s; }
+.form-section-enter:nth-child(5) { animation-delay: 0.25s; }
+
+/* Smooth focus transitions for medical form */
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid rgba(220, 38, 38, 0.3);
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for medical theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--color-primary) 50%, transparent);
+}
+
+/* Smooth page transitions */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Blood group button grid hover effect */
+.blood-group-btn {
+  transition: all 0.15s ease;
+}
+
+/* Image card overlay gradient preset */
+.image-card-overlay {
+  background: linear-gradient(to top, rgba(127, 29, 29, 0.9) 0%, rgba(153, 27, 27, 0.3) 50%, transparent 100%);
+}
