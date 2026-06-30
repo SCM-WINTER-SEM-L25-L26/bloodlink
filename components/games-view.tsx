@@ -41,14 +41,6 @@ export function GamesView({ subject, onBack }: GamesViewProps) {
           difficulty: "medium",
           subjectId: "math",
         },
-        {
-          id: "geometry-shapes",
-          title: "Shape Matcher",
-          description: "Match shapes with their properties",
-          type: "memory",
-          difficulty: "easy",
-          subjectId: "math",
-        },
       )
     } else if (subject.id === "science") {
       baseGames.push(
